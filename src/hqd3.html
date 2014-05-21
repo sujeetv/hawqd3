@@ -11,34 +11,44 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <!-- Custom styles for this template -->
     <link href="dashboard.css" rel="stylesheet">
-    
+    <style>
+    .chart div {
+	font: 10px sans-serif;
+	background-color: steelblue;
+	text-align: right;
+	padding: 3px;
+	margin: 1px;
+	color: white;
+    }
+    </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Latest compiled and minified JavaScript -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
     <script src="hqdsl.js"></script> 
-      
     <!-- jquery load -->
     <script>
        $( document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
             alert("error thrown");
         });
 
-        function execRaw(url, resultf){
-                alert("calling raw");
-                $.ajax({
-                 url:"http://www.google.com",
-                 dataType: 'jsonp',
-                 success:function(json){
-                     // do stuff with json (in this case an array)
-                     alert("Success");
-                 },
-                 error:function(){
-                     alert("Error");
-                 }      
-            });
-        }
-        
-        function exec(url, resultf) {
+       function testAjax(url, query, resultf) {
+            $.get(url,
+                  {"query" : query},
+                  function(data) {
+		      var res = $.parseJSON(data);
+		      alert(res);
+		      d3.select(".chart")
+			  .selectAll("div")
+			  .data(res)
+			  .enter().append("div")
+			  .style("width", function(d) { return d * 10 + "px"; })
+			  .text(function(d) { return d; });
+                  }
+            );
+       }
+
+       function exec(url, resultf) {
             var jqxhr = $.get( url, function( data ) {
                   alert("response received");
                   // resultf(data);
@@ -49,18 +59,17 @@
         
         // alert("jquery loaded")
         // alert($("#select-btn"))
-        $("#select-btn").click(function() {
-            // alert("Button clicked") 
-            ds1 = new DS("table1").select("a");
-            $("#sql-code-h4").text(ds1.toQuery());
-            jstext = 'ds1 = new DS("table1").select("a");'
-            $("#js-code-h4").text(jstext);
-            
-            // exec("http://localhost:8888/?query=select%20*%20from%20t1", function(data){
-            execRaw("http://www.google.com", function(data) {
-                alert("response received from google");
-            });
-        });
+          $("#select-btn").click(function() {
+              // alert("Button clicked") 
+              ds1 = new DS("t1").select("a");
+              $("#sql-code-h4").text(ds1.toQuery());
+              jstext = 'ds1 = new DS("t1").select("a");'
+              $("#js-code-h4").text(jstext);
+	      //exec("http://localhost:8888/?query=select%20*%20from%20t1", function(data){
+	      testAjax("http://localhost:8888/", "select b from t1", function(data) {
+                  alert("response received from google");
+              });
+          });
         
          $("#join-btn").click(function() {
             // alert("Button clicked")
@@ -104,9 +113,12 @@
                     <h4 id="js-code-h4">JS Code Goes Here</h4>
                     <h4 id="results-h4">Results go here</h4>
                 </div>
+                <div id="graph" class="chart col-lg-12 col-sm-3 placeholder"> </div>
+		
             </div>
         </div>
       </div>
     </div> 
+
   </body>
 </html>

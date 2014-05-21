@@ -7,40 +7,49 @@ var conString = "postgres://gpadmin:gpadmin@10.103.217.190/postgres";
 var server = http.createServer(function(req, res) {
     var url_parts = url.parse(req.url, true);
     var query_string = url_parts.query.query;
-    console.log(url_parts);
-    // get a pg client from the connection pool
-    pg.connect(conString, function(err, client, done) {
+    if (query_string) {
+	console.log(url_parts);
+	// get a pg client from the connection pool
+	pg.connect(conString, function(err, client, done) {
 
-        var handleError = function(err) {
-            // no error occurred, continue with the request
-            if(!err) return false;
+            var handleError = function(err) {
+		// no error occurred, continue with the request
+		if(!err) return false;
 
-            // An error occurred, remove the client from the connection pool.
-            // A truthy value passed to done will remove the connection from the pool
-            // instead of simply returning it to be reused.
-            // In this case, if we have successfully received a client (truthy)
-            // then it will be removed from the pool.
-            done(client);
-            res.writeHead(500, {'content-type': 'text/plain'});
-            res.end('An error occurred');
-            return true;
-        };
-        if (handleError(err)) return;
+		// An error occurred, remove the client from the connection pool.
+		// A truthy value passed to done will remove the connection from the pool
+		// instead of simply returning it to be reused.
+		// In this case, if we have successfully received a client (truthy)
+		// then it will be removed from the pool.
+		done(client);
+		res.writeHead(500, {'content-type': 'text/plain'});
+		res.end('An error occurred');
+		return true;
+            };
+            if (handleError(err)) return;
+            res.writeHead(200, {'content-type': 'application/json'});
+            var query = client.query(query_string);
+            query.on('row', function (row, result) {
+		result.addRow(row)
+		// res.write(row.a + "," + row.b + " ");  
+            });
+            query.on("error", function(error) {
+		console.log("Error: " + error);
+            });
+            
+            query.on('end', function(result) {
+		res.write(JSON.stringify(result.rows));
+		res.end();
+            });
+
+	});
+    }
+    else {
+	var data = { 'a': 20, 'b': 30 };
         res.writeHead(200, {'content-type': 'application/json'});
-        var query = client.query(query_string);
-        query.on('row', function (row, result) {
-            result.addRow(row)
-            // res.write(row.a + "," + row.b + " ");  
-        });
-        query.on("error", function(error) {
-            console.log("Error: " + error);
-        });
-        
-        query.on('end', function(result) {
-            res.write(JSON.stringify(result.rows));
-            res.end();
-        });
-    });
+	res.write(JSON.stringify(data));
+	res.end();
+    }
 });
 server.listen(8888);
 
