@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HAWQ-D3</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+      
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="hqdsl.js"></script>  
+    <!-- jquery load -->
+    <script>
+      $( document ).ready(function() {
+        // alert("jquery loaded")
+        // alert($("#select-btn"))
+        $("#select-btn").click(function() {
+            // alert("Button clicked") 
+            ds1 = new DS("table1").select("a");
+            $("#sql-code-h4").text(ds1.toQuery());
+            jstext = 'ds1 = new DS("table1").select("a");'
+            $("#js-code-h4").text(jstext);
+        });
+        
+         $("#join-btn").click(function() {
+            // alert("Button clicked")
+            dsj = ds1.join(new DS("table2").select("b"),["a", "b"]).select("a", "b")
+            $("#sql-code-h4").text(ds1.toQuery());
+            jstext = 'dsj = ds1.join(new DS("table2").select("b"),["a", "b"]).select("a", "b");'
+            $("#js-code-h4").text(jstext);
+        });
+      });
+  </script>
+  </head>
+  <body>
+     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">HAWQ D3</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><button type="button" id="select-btn" class="btn btn-default">Select</button></li>
+            <li><button type="button" id="join-btn" class="btn btn-default">Join</button></li>
+            <li><button type="button" id="kmeans-btn" class="btn btn-default">Kmeans</button></li>
+          </ul>
+        </div>
+        <div class="col-lg-12 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1 class="page-header">Vizualization</h1>
+            <div class="row placeholders">
+                <div class="col-lg-12 col-sm-3 placeholder">
+                    <h4 id="sql-code-h4">SQL Code Goes Here</h4>
+                    <h4 id="js-code-h4">JS Code Goes Here</h4>
+                    <h4 id="results-h4">Results go here</h4>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
