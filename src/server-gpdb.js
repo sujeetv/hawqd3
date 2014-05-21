@@ -11,30 +11,35 @@ var server = http.createServer(function(req, res) {
     // get a pg client from the connection pool
     pg.connect(conString, function(err, client, done) {
 
-	var handleError = function(err) {
-	    // no error occurred, continue with the request
-	    if(!err) return false;
+        var handleError = function(err) {
+            // no error occurred, continue with the request
+            if(!err) return false;
 
-	    // An error occurred, remove the client from the connection pool.
-	    // A truthy value passed to done will remove the connection from the pool
-	    // instead of simply returning it to be reused.
-	    // In this case, if we have successfully received a client (truthy)
-	    // then it will be removed from the pool.
-	    done(client);
-	    res.writeHead(500, {'content-type': 'text/plain'});
-	    res.end('An error occurred');
-	    return true;
-	};
-	if (handleError(err)) return;
-	res.writeHead(200, {'content-type': 'text/plain'});
-	res.write('Results from GPDB:');
-	var query = client.query(query_string);
-	query.on('row', function (row) {
-	    res.write(row.a + ', ' + row.b);
-	});
-	query.on('end', function(result) {
-	    res.end('Retrieved ' + result.rowCount + ' rows from GPDB');
-	});
+            // An error occurred, remove the client from the connection pool.
+            // A truthy value passed to done will remove the connection from the pool
+            // instead of simply returning it to be reused.
+            // In this case, if we have successfully received a client (truthy)
+            // then it will be removed from the pool.
+            done(client);
+            res.writeHead(500, {'content-type': 'text/plain'});
+            res.end('An error occurred');
+            return true;
+        };
+        if (handleError(err)) return;
+        res.writeHead(200, {'content-type': 'application/json'});
+        var query = client.query(query_string);
+        query.on('row', function (row, result) {
+            result.addRow(row)
+            // res.write(row.a + "," + row.b + " ");  
+        });
+        query.on("error", function(error) {
+            console.log("Error: " + error);
+        });
+        
+        query.on('end', function(result) {
+            res.write(JSON.stringify(result.rows));
+            res.end();
+        });
     });
 });
 server.listen(8888);

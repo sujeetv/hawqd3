@@ -11,14 +11,42 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <!-- Custom styles for this template -->
     <link href="dashboard.css" rel="stylesheet">
-      
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Latest compiled and minified JavaScript -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script src="hqdsl.js"></script>  
+    <script src="hqdsl.js"></script> 
+      
     <!-- jquery load -->
     <script>
+       $( document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
+            alert("error thrown");
+        });
+
+        function execRaw(url, resultf){
+                alert("calling raw");
+                $.ajax({
+                 url:"http://www.google.com",
+                 dataType: 'jsonp',
+                 success:function(json){
+                     // do stuff with json (in this case an array)
+                     alert("Success");
+                 },
+                 error:function(){
+                     alert("Error");
+                 }      
+            });
+        }
+        
+        function exec(url, resultf) {
+            var jqxhr = $.get( url, function( data ) {
+                  alert("response received");
+                  // resultf(data);
+             }, "json");
+        };
+        
       $( document ).ready(function() {
+        
         // alert("jquery loaded")
         // alert($("#select-btn"))
         $("#select-btn").click(function() {
@@ -27,6 +55,11 @@
             $("#sql-code-h4").text(ds1.toQuery());
             jstext = 'ds1 = new DS("table1").select("a");'
             $("#js-code-h4").text(jstext);
+            
+            // exec("http://localhost:8888/?query=select%20*%20from%20t1", function(data){
+            execRaw("http://www.google.com", function(data) {
+                alert("response received from google");
+            });
         });
         
          $("#join-btn").click(function() {
@@ -74,6 +107,6 @@
             </div>
         </div>
       </div>
-    </div>
+    </div> 
   </body>
 </html>
